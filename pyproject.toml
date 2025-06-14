@@ -5,11 +5,24 @@ description = "Local Dspy projects"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "accelerate>=1.7.0",
     "agno>=1.6.2",
+    "arbor-ai>=0.2.1",
+    "bm25s>=0.2.13",
     "dspy>=2.6.27",
+    "fal-client>=0.7.0",
     "helper>=2.5.0",
     "ipykernel>=6.29.5",
+    "math-equivalence",
+    "mcp>=1.9.4",
     "mlflow>=3.1.0",
     "pydantic>=2.11.6",
     "rich>=14.0.0",
+    "stemmer>=0.0.4",
+    "tokenizers>=0.21.1",
+    "transformers>=4.52.4",
+    "ujson>=5.10.0",
 ]
+
+[tool.uv.sources]
+math-equivalence = { git = "https://github.com/hendrycks/math.git" }

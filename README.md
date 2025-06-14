@@ -41,7 +41,7 @@ Clone the repository and set up the environment:
 git clone <git@github.com:AIFlowML/dspy_examples.git>
 cd dspy
 
-# Create virtual environment with Python 3.13
+# Create virtual environment with Python 3.12 (recommended for compatibility)
 uv venv --python 3.12
 
 # Activate the virtual environment
@@ -55,35 +55,76 @@ uv sync
 
 ### 3. Environment Variables Setup
 
-Create a `.env` file in the project root:
+**Step 1: Create `.env.example` template (if it doesn't exist)**
 
 ```bash
-# Copy the example or create new .env file
-cp .env.example .env  # if available
-# or create manually:
-touch .env
+# Create .env.example template
+cat > .env.example << 'EOF'
+# OpenAI API Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+
+# MLflow Configuration for Local Development
+DLAI_LOCAL_URL=http://localhost:{port}
+
+# Optional: Other AI Provider Keys (uncomment if needed)
+# ANTHROPIC_API_KEY=your_anthropic_key_here
+# GOOGLE_API_KEY=your_google_key_here
+EOF
 ```
 
-Add your API keys to the `.env` file:
+**Step 2: Copy and customize your environment file**
+
+```bash
+# Duplicate .env.example to create your .env file
+cp .env.example .env
+```
+
+**Step 3: Add your actual API keys to `.env`**
+
+Edit the `.env` file with your real API keys:
 
 ```env
-OPENAI_API_KEY=your_openai_api_key_here
+# Required: OpenAI API Key (get from https://platform.openai.com/api-keys)
+OPENAI_API_KEY=sk-your-actual-openai-api-key-here
+
+# Required for MLflow Integration (Lesson 3)
 DLAI_LOCAL_URL=http://localhost:{port}
 ```
 
-### 4. Running MLflow (for Lesson 3)
+**⚠️ Important:** Never commit your actual `.env` file to version control!
 
-For lesson 3, you'll need to run MLflow UI locally:
+### 4. Running MLflow for Testing and Debugging
+
+MLflow is essential for tracing and debugging DSPy programs, especially in Lesson 3.
+
+**Start MLflow UI locally during tests:**
 
 ```bash
-# Make sure your virtual environment is activated
+# Terminal 1: Start MLflow UI (keep this running during lessons)
 source .venv/bin/activate
+mlflow ui --host 127.0.0.1 --port 8080
 
-# Start MLflow UI on port 8080
-mlflow ui --port 8080
+# You should see output like:
+# [INFO] Starting gunicorn 20.1.0
+# [INFO] Listening at: http://127.0.0.1:8080
 ```
 
-Keep this terminal window open while working with Lesson 3. MLflow UI will be available at `http://localhost:8080`
+**In Terminal 2: Run your notebooks**
+
+```bash
+source .venv/bin/activate
+jupyter lab
+```
+
+**Test MLflow connection:**
+
+```bash
+# Check if MLflow is running
+curl -I http://localhost:8080
+# Should return: HTTP/1.1 200 OK
+```
+
+MLflow UI will be available at: `http://localhost:8080`
 
 ### 5. Running Jupyter Notebooks
 
@@ -149,6 +190,51 @@ uv sync  # Sync all dependencies
 uv add package_name  # Add specific package
 ```
 
+### Package Build Issues (sentencepiece, arbor-ai, vllm)
+
+If you encounter build errors with packages like `arbor-ai` that depend on `sentencepiece`:
+
+**Solution 1: Use Python 3.12 (Recommended)**
+
+```bash
+# Remove current environment and recreate with Python 3.12
+rm -rf .venv
+uv venv --python 3.12
+source .venv/bin/activate
+uv sync
+uv add arbor-ai
+```
+
+**Solution 2: Install System Dependencies (macOS)**
+
+```bash
+# Install required build dependencies
+brew install cmake pkg-config protobuf sentencepiece
+
+# Set environment variables
+export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
+export CMAKE_PREFIX_PATH="/opt/homebrew:$CMAKE_PREFIX_PATH"
+
+# Try installation again
+uv add arbor-ai
+```
+
+**Solution 3: Use Binary Packages Only**
+
+```bash
+# Force use of pre-built wheels
+uv add arbor-ai --only-binary=all
+```
+
+**Solution 4: Alternative Packages**
+
+If you only need core AI functionality:
+
+```bash
+# Install essential packages without heavy dependencies
+uv add openai anthropic transformers torch
+```
+
 ## Requirements
 
 - Python 3.10+
@@ -159,7 +245,7 @@ uv add package_name  # Add specific package
 
 ```bash
 # Setup (one-time)
-uv venv --python 3.13
+uv venv --python 3.12
 source .venv/bin/activate
 uv sync
 
